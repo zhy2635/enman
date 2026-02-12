@@ -1,0 +1,42 @@
+[package]
+name = "enman"
+version = "0.1.0"
+edition = "2021"
+description = "Unified environment manager for dev tools (Node.js, Python, Ruby, databases, CLI tools)"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/yourname/enman"
+readme = "README.md"        # 建议加上
+keywords = ["toolchain", "version-manager", "dev-tools"]  # 可选，利于 crates.io 搜索
+categories = ["development-tools"]                        # 可选
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+dirs = "5.0"
+anyhow = "1.0"
+reqwest = { version = "0.12", features = ["json", "stream"] }
+tokio = { version = "1.37", features = ["full"] }   # ✅ 锁定主版本
+tokio-util = "0.7"
+futures-util = "0.3"
+zip = "0.6"
+tar = "0.4"
+xz2 = "0.1"
+flate2 = "1.0"
+tempfile = "3.10"    
+serde_json = "1.0"
+rpassword = "7.0"
+indicatif = { version = "0.17", features = ["tokio"] }
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+
+[[bin]]
+name = "em"
+path = "src/em.rs"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = ["stringapiset", "winnls"] }
+
+[env]
+# 设置环境变量以避免捆绑库
+WINAPI_NO_BUNDLED_LIBRARIES = "1"

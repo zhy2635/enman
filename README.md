@@ -51,8 +51,6 @@ cargo install --path .
 - **一键安装**：简单几步即可完成安装，无需手动配置
 - **配置持久化**：安装时可选择命令行工具的语言偏好，并保存至配置文件
 
-请参阅 [GUI 安装程序说明](./GUI_INSTALLER_NOTE.md) 了解更多信息。
-
 ## 快速开始
 
 1. 初始化 enman：
@@ -231,6 +229,17 @@ enman list --sys-info
 # - 当前时间
 ```
 
+### 支持的工具
+
+目前支持的工具包括：
+- Node.js
+- Python
+- Java
+- MySQL
+- MariaDB
+- Redis
+- 更多工具即将推出...
+
 ## 贡献
 
 欢迎贡献！请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
@@ -246,9 +255,3 @@ Licensed under either of:
 如果遇到问题，请查看 [GitHub Issues](https://github.com/zhy2635/enman/issues) 或提交新问题。
 
 ---
-
-更多信息请参阅：
-- [安装指南](./INSTALL.md)
-- [配置说明](./CONFIGURATION.md)
-- [发布和打包流程](./PUBLISHING.md)
-- [GUI 安装程序说明](./GUI_INSTALLER_NOTE.md)

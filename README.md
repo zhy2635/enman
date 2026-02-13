@@ -15,28 +15,19 @@
 - ✅ 简洁直观的命令行界面
 - ✅ 无调试输出干扰的纯净命令输出
 - ✅ Windows 图形安装程序（带有多语言支持）
-- ✅ 单命令安装脚本（见下方）
+- ✅ 支持 Redis 等更多开发工具
+- ✅ 显示系统信息（TLS 版本、操作系统信息等）
 
 ## 安装
+
+### Windows 图形安装程序（推荐）
+
+**Windows 用户**: 从 v1.0 版本下载 `enman-x86_64-windows.exe` 文件并运行图形安装程序。安装程序提供多语言支持和自动环境变量配置。
 
 ### 使用 Cargo 安装
 
 ```bash
 cargo install enman
-```
-
-### 使用一键安装脚本
-
-#### Windows
-```powershell
-# 在 PowerShell 中运行
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/zhy2635/enman/main/install.ps1')
-```
-
-#### macOS/Linux
-```bash
-# 在终端中运行
-curl -fsSL https://raw.githubusercontent.com/zhy2635/enman/main/install.sh | bash
 ```
 
 ### 从源码构建
@@ -50,8 +41,6 @@ cargo install --path .
 ### 下载预构建二进制文件
 
 访问 [Releases](https://github.com/zhy2635/enman/releases) 页面下载适合你系统的预构建二进制文件。
-
-**Windows 用户**: 下载 `enman-x86_64-pc-windows-msvc.exe` 文件并运行安装程序。安装程序提供多语言支持和自动环境变量配置。
 
 ## GUI 安装程序
 
@@ -81,11 +70,13 @@ em init
 enman install node@18.17.0
 enman install python@3.11.5
 enman install java@17
+enman install redis@7.2.4
 
 # 列出可用版本
 enman list node --remote
 enman list python --remote
 enman list java --remote
+enman list redis --remote
 ```
 
 3. 设置全局版本：
@@ -95,6 +86,7 @@ enman list java --remote
 enman global node@18.17.0
 enman global python@3.11.5
 enman global java@17
+enman global redis@7.2.4
 ```
 
 4. 在项目中使用特定版本：
@@ -104,6 +96,7 @@ enman global java@17
 echo '[tools]' > .enmanrc
 echo 'node = "16.14.0"' >> .enmanrc
 echo 'python = "3.10.9"' >> .enmanrc
+echo 'redis = "7.2.4"' >> .enmanrc
 
 # 应用配置
 enman config apply
@@ -119,6 +112,7 @@ enman config apply
 enman install node@18.17.0
 enman install python@3.11.5
 enman install java@17
+enman install redis@7.2.4
 ```
 
 ### `use`
@@ -138,6 +132,7 @@ node --version  # 输出: v16.14.0 (无额外调试信息)
 enman list node        # 列出已安装的 Node.js 版本
 enman list node --remote  # 列出可安装的 Node.js 版本
 enman list --available   # 列出所有可用的工具
+enman list --sys-info    # 显示系统信息和所有工具的全局版本
 ```
 
 ### `global`
@@ -178,6 +173,7 @@ enman 支持项目级配置文件 `.enmanrc`，格式如下：
 node = "18.17.0"
 python = "3.11.5"
 java = "17"
+redis = "7.2.4"
 ```
 
 当进入项目目录时，enman 会自动应用这些配置。
@@ -207,7 +203,33 @@ enman 提供了许多方便的别名：
 - Java
 - MySQL
 - MariaDB
+- Redis
 - 更多工具即将推出...
+
+## 高级用法
+
+### 使用别名
+
+enman 提供了许多方便的别名：
+
+- `em` 是 `enman` 的别名
+- `in` 是 `install` 的别名
+- `ls` 是 `list` 的别名
+- `un` 是 `uninstall` 的别名
+
+### 显示系统信息
+
+使用 `--sys-info` 参数显示系统信息：
+
+```bash
+enman list --sys-info
+# 显示:
+# - 操作系统信息
+# - TLS后端类型
+# - enman版本
+# - Rust版本
+# - 当前时间
+```
 
 ## 贡献
 

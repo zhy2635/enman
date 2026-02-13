@@ -10,9 +10,9 @@ enman 是一个统一的开发环境管理工具，用于管理各种开发工�
 
 ## 安装方式
 
-### 方式一：使用 Cargo 安装（推荐）
+### 方式一：使用 Cargo 安装
 
-如果你已经安装了 Rust 工具链，这是最简单的方法：
+如果你已经安装了 Rust 工具链，可以使用以下命令安装：
 
 ```bash
 # 从 crates.io 安装
@@ -22,17 +22,33 @@ cargo install enman
 cargo install --git https://github.com/zhy2635/enman.git
 ```
 
-### 方式二：下载预构建的二进制文件
+### 方式二：Windows 图形安装程序（推荐）
+
+对于 Windows 用户，我们强烈推荐使用带有图形界面的安装程序，具有以下特点：
+1. 访问 [GitHub Releases v1.0](https://github.com/zhy2635/enman/releases/tag/v1.0) 页面
+2. 下载 `enman-x86_64-windows.exe` 文件
+3. 运行下载的安装程序并按照提示完成安装
+4. 安装完成后，重启终端以使环境变量生效
+
+图形安装程序提供了多语言支持、自动环境变量配置和用户友好的安装向导。
+
+### 方式三：下载预构建的二进制文件
 
 1. 访问 [GitHub Releases](https://github.com/zhy2635/enman/releases) 页面
 2. 根据你的操作系统下载对应的预构建二进制文件：
-   - Windows: `enman-x86_64-pc-windows-msvc.exe` - 下载并运行安装程序
    - macOS: `enman-x86_64-apple-darwin.tar.gz`
    - Linux: `enman-x86_64-unknown-linux-gnu.tar.gz`
-3. 对于 Windows 用户，下载 `.exe` 文件并运行安装程序。安装完成后，重启终端以使环境变量生效。
-4. 对于 macOS/Linux，解压并将其添加到系统的 PATH 环境变量中
+3. 对于 macOS/Linux，解压并将其添加到系统的 PATH 环境变量中
+   - 将以下行添加到你的 shell 配置文件（如 `.bashrc`, `.zshrc`）：
+     ```bash
+     export PATH="$HOME/.enman/shims:$PATH"
+     ```
+   - 然后重新加载配置：
+     ```bash
+     source ~/.bashrc  # 或 source ~/.zshrc
+     ```
 
-### 方式三：从源码构建
+### 方式四：从源码构建
 
 ```bash
 # 克隆仓库
@@ -46,40 +62,11 @@ cargo build --release
 # 将其复制到系统 PATH 中的目录
 ```
 
-### 方式四：Windows 一键安装脚本
-
-如果你使用 Windows，也可以使用 PowerShell 一键安装脚本：
-
-```powershell
-# 在 PowerShell 中以管理员身份运行
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/zhy2635/enman/main/install.ps1')
-```
-
-## 首次使用设置
-
-安装完成后，运行以下命令进行初始化：
-
-```bash
-# 初始化 enman
-enman init
-
-# 或使用别名
-em init
-```
-
-此命令将创建必要的目录结构并生成 shell 集成脚本。
 
 ## 环境配置
 
 为了使 enman 正常工作，你需要确保 `~/.enman/shims` 目录在你的 PATH 环境变量中。
 
-### Windows
-
-使用 PowerShell 添加到 PATH：
-
-```powershell
-[Environment]::SetEnvironmentVariable("PATH", "$env:USERPROFILE\.enman\shims;$([Environment]::GetEnvironmentVariable("PATH", "User"))", "User")
-```
 
 ### macOS/Linux
 

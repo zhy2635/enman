@@ -10,12 +10,13 @@ The project-level configuration feature enables teams to define which versions o
 
 The configuration file uses TOML format and defines tools under a `[tools]` section:
 
-```toml
+``toml
 [tools]
 node = "18.17.0"
 python = "3.11.5"
 java = "17.0.8"
 mysql = "8.0.33"
+redis = "7.2.4"
 ```
 
 By default, enman looks for a file named `.enmanrc` in the current directory, but you can specify a custom path with the `-f` flag.
@@ -62,22 +63,23 @@ This command will:
 
 ### Basic Web Development Setup
 
-```toml
+``toml
 [tools]
 node = "18.17.0"
 npm = "9.6.7"
 python = "3.11.5"
+redis = "7.2.4"
 ```
 
 ### Full Stack Application
 
-```toml
+``toml
 [tools]
 node = "18.17.0"
 python = "3.11.5"
 java = "17.0.8"
 mysql = "8.0.33"
-redis = "7.0.12"
+redis = "7.2.4"
 ```
 
 ## Benefits
@@ -99,8 +101,10 @@ The configuration system integrates with the rest of enman's functionality:
 ## Supported Tools
 
 Currently supports all tools that enman supports, including:
-- Node.js and associated npm/yarn
+- Node.js
 - Python
-- Java/JDK
+- Java
 - MySQL
-- And more as added to enman
+- MariaDB
+- Redis
+- More tools coming soon...

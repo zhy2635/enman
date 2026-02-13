@@ -193,28 +193,6 @@ enman 提供了许多方便的别名：
 - `ls` 是 `list` 的别名
 - `un` 是 `uninstall` 的别名
 
-### 支持的工具
-
-目前支持的工具包括：
-- Node.js
-- Python
-- Java
-- MySQL
-- MariaDB
-- Redis
-- 更多工具即将推出...
-
-## 高级用法
-
-### 使用别名
-
-enman 提供了许多方便的别名：
-
-- `em` 是 `enman` 的别名
-- `in` 是 `install` 的别名
-- `ls` 是 `list` 的别名
-- `un` 是 `uninstall` 的别名
-
 ### 显示系统信息
 
 使用 `--sys-info` 参数显示系统信息：
@@ -240,10 +218,6 @@ enman list --sys-info
 - Redis
 - 更多工具即将推出...
 
-## 贡献
-
-欢迎贡献！请参阅 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
-
 ## 许可证
 
 Licensed under either of:
@@ -255,3 +229,7 @@ Licensed under either of:
 如果遇到问题，请查看 [GitHub Issues](https://github.com/zhy2635/enman/issues) 或提交新问题。
 
 ---
+
+更多信息请参阅：
+- [安装指南](./INSTALL.md)
+- [配置说明](./CONFIGURATION.md)

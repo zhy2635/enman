@@ -1,9 +1,10 @@
 // src/downloader/mod.rs
-pub mod node;
 pub mod java;
+pub mod mariadb;
 pub mod mysql;
-pub mod mariadb;  // 添加 MariaDB 模块
-pub mod python;  // 添加 Python 模块
+pub mod node;
+pub mod python;
+pub mod redis;  // 添加Redis模块
 
 use anyhow::Result;
 use std::path::Path;
@@ -15,8 +16,9 @@ pub async fn install(tool: &str, version: &str, install_dir: &Path) -> Result<()
         "mysql" => mysql::install(version, install_dir).await,
         "mariadb" => mariadb::install(version, install_dir).await,  // 添加 MariaDB 支持
         "python" => python::install(version, install_dir).await,  // 添加 Python 支持
+        "redis" => redis::install(version, install_dir).await,  // 添加 Redis 支持
         _ => Err(anyhow::anyhow!(
-            "Unsupported tool: '{}'. Supported: node, java, jdk, mysql, mariadb, python",
+            "Unsupported tool: '{}'. Supported: node, java, jdk, mysql, mariadb, python, redis",
             tool
         )),
     }
@@ -28,6 +30,7 @@ pub async fn list_available_versions(tool: &str, limit: Option<usize>) -> Result
         "node" => Ok(node::list_available_versions(limit).await?),
         "java" | "jdk" => Ok(java::list_available_versions(limit).await?),
         "python" => Ok(python::list_available_versions(limit).await?),
+        "redis" => Ok(redis::list_redis_versions().await?), // 修复：移除limit参数
         "mysql" | "mariadb" => {
             // 这些工具的版本列表功能尚未实现
             let common_versions = vec![
@@ -44,7 +47,7 @@ pub async fn list_available_versions(tool: &str, limit: Option<usize>) -> Result
             Ok(limited_versions)
         },
         _ => Err(anyhow::anyhow!(
-            "Version listing not supported for tool: '{}'. Supported: node, java, jdk, mysql, mariadb, python",
+            "Version listing not supported for tool: '{}'. Supported: node, java, jdk, mysql, mariadb, python, redis",
             tool
         )),
     }

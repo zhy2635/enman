@@ -70,19 +70,33 @@ fn get_tool_name_from_exe() -> Option<String> {
 }
 
 fn run_tool(tool: &str, args: &[String]) -> anyhow::Result<()> {
-    eprintln!("[DEBUG] Current working directory: {}", env::current_dir()?.display());
-    eprintln!("[SHIM] Detected tool: '{}'", tool);
-
     let paths = crate::core::paths::EnvManPaths::new()?;
 
-    // 🔍 1. 尝试从 .enmanrc 获取本地版本
-    let local_version = find_local_version(tool, env::current_dir()?);
-
-    let version = if let Some(v) = local_version {
-        eprintln!("[LOCAL] Using {}@{} from .enmanrc", tool, v);
+    // 🔍 1. 尝试从当前目录的 .enman-version 获取本地版本（最高优先级）
+    let current_dir = std::env::current_dir()?;
+    let local_version_file = current_dir.join(".enman-version");
+    let version = if local_version_file.exists() {
+        let content = std::fs::read_to_string(&local_version_file)?.trim().to_string();
+        // 解析版本内容，如果是 "tool@version" 格式，只取版本部分
+        if let Some(pos) = content.find('@') {
+            let (file_tool, file_version) = content.split_at(pos);
+            if file_tool == tool {
+                file_version[1..].to_string()  // 跳过 '@' 符号
+            } else {
+                // 如果文件中的工具名称不匹配，使用整个内容作为版本（为了向后兼容）
+                eprintln!("Warning: tool name mismatch in local version file. Expected: {}, Found: {}", tool, file_tool);
+                content.trim_matches('"').to_string()
+            }
+        } else {
+            // 如果没有 @ 符号，直接使用内容作为版本号
+            content.trim_matches('"').to_string()
+        }
+    }
+    // 🔍 2. 尝试从 .enmanrc 获取本地版本
+    else if let Some(v) = find_local_version(tool, current_dir) {
         v
     } else {
-        // 🌐 2. 回退到全局版本
+        // 🌐 3. 回退到全局版本
         let version_file = paths.global_version_file(tool);
         if !version_file.exists() {
             eprintln!("Error: no global version set for '{}'.", tool);
@@ -90,20 +104,36 @@ fn run_tool(tool: &str, args: &[String]) -> anyhow::Result<()> {
             std::process::exit(1);
         }
 
-        let version = std::fs::read_to_string(&version_file)?
+        let version_content = std::fs::read_to_string(&version_file)?
             .trim()
             .to_string();
 
-        if version.is_empty() {
+        if version_content.is_empty() {
             eprintln!("Error: global version file for '{}' is empty", tool);
             std::process::exit(1);
         }
+        
+        // 解析版本内容，如果是 "tool@version" 格式，只取版本部分
+        let version = if let Some(pos) = version_content.find('@') {
+            // 确保 @ 符号前面的部分与工具名称匹配
+            let (file_tool, file_version) = version_content.split_at(pos);
+            if file_tool == tool {
+                file_version[1..].to_string()  // 跳过 '@' 符号
+            } else {
+                // 如果文件中的工具名称不匹配，使用整个内容作为版本（为了向后兼容）
+                eprintln!("Warning: tool name mismatch in global version file. Expected: {}, Found: {}", tool, file_tool);
+                version_content.trim_matches('"').to_string()
+            }
+        } else {
+            // 如果没有 @ 符号，直接使用内容作为版本号
+            version_content.trim_matches('"').to_string()
+        };
+        
         version
     };
 
     // ✅ 构建二进制路径
     let bin_dir = paths.install_bin_path(tool, &version);
-    eprintln!("[DEBUG] install_bin_path('{}', '{}') = {}", tool, version, bin_dir.display());
 
     let bin_name = if cfg!(windows) {
         format!("{}.exe", tool)
@@ -111,7 +141,6 @@ fn run_tool(tool: &str, args: &[String]) -> anyhow::Result<()> {
         tool.to_string()
     };
     let tool_bin = bin_dir.join(bin_name);
-    eprintln!("[DEBUG] Final binary path: {}", tool_bin.display());
 
     if !tool_bin.exists() {
         eprintln!("Error: {}@{} is not installed (looked for {})", tool, version, tool_bin.display());

@@ -17,9 +17,17 @@ pub struct ListArgs {
     /// List remote versions available for download
     #[arg(long = "remote", short = 'r', requires = "tool", help = crate::localization::get_localizer().t("arg_remote_help"))]
     pub remote: bool,
+
+    /// Show system information like TLS version, OS info, etc
+    #[arg(long = "sys-info", short = 's', help = "Show system information like TLS version, OS info, etc")]
+    pub sys_info: bool,
 }
 
 pub async fn run(args: ListArgs) -> Result<()> {
+    if args.sys_info {
+        show_system_info()?;
+    }
+
     let paths = EnvManPaths::new()?;
 
     if args.available {
@@ -38,6 +46,53 @@ pub async fn run(args: ListArgs) -> Result<()> {
         }
         Ok(())
     }
+}
+
+// === 显示系统信息 ===
+fn show_system_info() -> Result<()> {
+    use std::process::Command;
+    use std::env;
+    
+    println!("=== System Information ===");
+    
+    // 显示操作系统信息
+    println!("OS: {} {}", env::consts::OS, env::consts::ARCH);
+    
+    // 显示Rust TLS后端信息
+    println!("TLS Backend: {}",
+        if cfg!(feature = "native-tls") { "native-tls" }
+        else if cfg!(feature = "rustls") { "rustls" }
+        else { "default" });
+    
+    // 尝试检测OpenSSL版本（如果可用）
+    #[cfg(target_family = "unix")]
+    {
+        if let Ok(output) = Command::new("openssl").arg("version").output() {
+            if !output.stdout.is_empty() {
+                let openssl_version = String::from_utf8_lossy(&output.stdout);
+                println!("OpenSSL: {}", openssl_version.trim());
+            }
+        }
+    }
+    
+    // 显示enman版本
+    if let Some(version) = option_env!("CARGO_PKG_VERSION") {
+        println!("enman version: {}", version);
+    }
+    
+    // 显示Rust版本
+    if let Ok(output) = Command::new("rustc").arg("--version").output() {
+        if !output.stdout.is_empty() {
+            let rust_version = String::from_utf8_lossy(&output.stdout);
+            println!("Rust: {}", rust_version.trim());
+        }
+    }
+    
+    // 显示当前时间
+    println!("Current Time: {:?}", chrono::Utc::now());
+    
+    println!("========================");
+    Ok(())
 }
 
 // === 列出特定工具的远程可用版本 ===

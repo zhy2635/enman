@@ -201,10 +201,14 @@ pub async fn list_available_versions(limit: Option<usize>) -> Result<Vec<String>
             .iter()
             .filter_map(|item| item.get("version").and_then(|v| v.as_str()))
             .map(|v| v.strip_prefix('v').unwrap_or(v).to_string())
+            .filter(|version| {
+                // 过滤掉过旧的版本，只保留 0.10.x 以上的版本
+                is_modern_version(version)
+            })
             .collect();
         
         // 按版本号排序
-        versions.sort_by(|a, b| version_compare(a, b));
+        versions.sort_by(|a, b| version_compare(b, a)); // 按降序排列（最新的在前）
         
         if let Some(limit) = limit {
             versions.truncate(limit);
@@ -213,6 +217,28 @@ pub async fn list_available_versions(limit: Option<usize>) -> Result<Vec<String>
         Ok(versions)
     } else {
         Err(anyhow::anyhow!("Invalid response format from Node.js API"))
+    }
+}
+
+// 辅助函数：判断是否为现代版本
+fn is_modern_version(version: &str) -> bool {
+    let parts: Vec<u32> = version.split('.')
+        .take(2) // 只考虑主版本号和次版本号
+        .map(|s| s.parse().unwrap_or(0))
+        .collect();
+    
+    if parts.len() < 2 {
+        return false;
+    }
+    
+    let major = parts[0];
+    let minor = parts[1];
+    
+    // 只显示 Node.js 10 及以上版本，或至少是 0.10.x 以上的版本
+    if major == 0 {
+        minor >= 10  // 0.10.x 及以上
+    } else {
+        major >= 10  // Node.js 10 及以上
     }
 }
 

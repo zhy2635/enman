@@ -1,82 +1,45 @@
 // src/cli/install.rs
-use clap::Args;
+use crate::core::paths;
+use crate::downloader;
 use anyhow::Result;
-use std::path::PathBuf;
+use clap::Args;
+use std::fs;
 
 #[derive(Args)]
 pub struct InstallArgs {
-    /// Tool and version in format: tool@version (e.g., node@20.10.0)
-    #[arg(value_parser = parse_tool_version, help = crate::localization::get_localizer().t("arg_tool_version_help"))] 
-    pub tool_version: String,
-}
-
-fn parse_tool_version(s: &str) -> Result<String, String> {
-    let parts: Vec<&str> = s.split('@').collect();
-    if parts.len() != 2 {
-        return Err("Invalid format. Use: tool@version (e.g., 'node@16.14.0')".to_string());
-    }
-    Ok(s.to_string())
-}
-
-fn get_enman_root() -> Result<PathBuf> {
-    let home = dirs::home_dir().ok_or_else(|| anyhow::anyhow!("Failed to get home directory"))?;
-    Ok(home.join(".enman"))
-}
-
-fn create_shim(tool: &str) -> Result<()> {
-    let root = get_enman_root()?;
-    let shims_dir = root.join("shims");
-    std::fs::create_dir_all(&shims_dir)?;
-
-    let shim_path = if cfg!(windows) {
-        shims_dir.join(format!("{}.exe", tool))
-    } else {
-        shims_dir.join(tool)
-    };
-
-    if shim_path.exists() {
-        return Ok(());
-    }
-
-    let current_exe = std::env::current_exe()?;
-    
-    #[cfg(windows)]
-    std::fs::copy(&current_exe, &shim_path)?;
-    
-    #[cfg(unix)]
-    std::os::unix::fs::symlink(&current_exe, &shim_path)?;
-
-    println!("   → Created shim at {}", shim_path.display());
-    Ok(())
+    /// Tool and version to install (e.g., "node@16.14.0")
+    #[arg(value_parser = crate::cli::parse_tool_version)]
+    pub tool: (String, String),
 }
 
 pub async fn run(args: InstallArgs) -> Result<()> {
-    let parts: Vec<&str> = args.tool_version.split('@').collect();
+    let (tool, version) = args.tool;
     
-    if parts.len() != 2 {
-        return Err(anyhow::anyhow!("Invalid format. Use: tool@version (e.g., 'node@16.14.0')"));
-    }
+    let env_paths = paths::EnvManPaths::new()?;
+    let install_dir = env_paths.install_dir(&tool);
+    let install_path = install_dir.join(&version);
     
-    let tool = parts[0];
-    let version = parts[1];
-
-    let root = get_enman_root()?;
-    let install_dir = root.join("installs");
-    let install_path = install_dir.join(tool).join(version);
-
+    // 检查是否已安装
     if install_path.exists() {
-        println!("⚠️  {} @ {} already installed", tool, version);
+        println!("{} @ {} already installed", tool, version);
         return Ok(());
     }
+    
+    println!("Installing {} {}", tool, version);
 
-    println!("📦 {} {} @ {}", crate::localization::get_localizer().t("Installing"), tool, version);
+    // 安装工具
+    downloader::install(&tool.to_lowercase(), &version, &install_path).await?;
+
+    // 创建shim
+    let shims_dir = env_paths.root.join("shims");
+    fs::create_dir_all(&shims_dir)?;
     
-    // ✅ 核心：委托给 downloader 模块
-    crate::downloader::install(tool, version, &install_path).await?;
-    
-    create_shim(tool)?;
-    
-    println!("\n✅ Successfully installed {} {}!", tool, version);
-    println!("💡 Run `{}` after adding ~/.enman/shims to your PATH", tool);
+    let shim_exe = shims_dir.join(format!("{}.exe", tool));
+    // 复制当前可执行文件到shim位置
+    let current_exe = std::env::current_exe()?;
+    fs::copy(current_exe, &shim_exe)?;
+
+    println!("Installed {} {} successfully!", tool, version);
+
     Ok(())
 }

@@ -86,6 +86,7 @@ redis = "7.0.12"
 - **Onboarding**: New team members can get the correct environment with one command
 - **Reproducibility**: Builds and tests behave consistently across different machines
 - **Version Control**: Track your environment requirements alongside your code
+- **Clean Output**: Tools run with clean output without extra debug information
 
 ## Integration
 
@@ -93,6 +94,7 @@ The configuration system integrates with the rest of enman's functionality:
 - Uses the same download and installation mechanisms
 - Works with both `use` and `global` commands
 - Respects existing enman paths and shims
+- Provides transparent command interception without adding debug messages
 
 ## Supported Tools
 
